@@ -15,7 +15,7 @@ pub fn merge_sort<T: PartialOrd + Copy>(arr: &mut [T], p: usize, r: usize) {
     }
 }
 
-pub fn merge<T: PartialOrd + Copy>(left: &[T], right: &[T]) -> Vec<T> {
+fn merge<T: PartialOrd + Copy>(left: &[T], right: &[T]) -> Vec<T> {
     let mut i = 0;
     let mut j = 0;
 
