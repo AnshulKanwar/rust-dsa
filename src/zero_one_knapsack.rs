@@ -1,23 +1,15 @@
-// TODO
-use std::cmp::Ordering;
 use std::cmp::max;
+use std::cmp::Ordering;
 
 #[derive(Debug)]
 pub struct Item {
-    id: String,
     weight: u32,
     value: u32,
 }
 
 impl Item {
-    pub fn new(id: &str, weight: u32, value: u32) -> Item {
-        let id = id.to_string(); 
-
-        Item {
-            id,
-            weight,
-            value,
-        }
+    pub fn new(weight: u32, value: u32) -> Item {
+        Item { weight, value }
     }
 }
 
@@ -25,7 +17,7 @@ impl Eq for Item {}
 
 impl PartialEq for Item {
     fn eq(&self, other: &Self) -> bool {
-        self.value as f32 / self.weight as f32 == other.value as f32 / other.weight as f32
+        self.value / self.weight == other.value / other.weight
     }
 }
 
@@ -37,37 +29,43 @@ impl PartialOrd for Item {
 
 impl Ord for Item {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.weight.cmp(&other.weight)
+        let ratio_self = self.value / self.weight;
+        let ratio_other = other.value / other.weight;
+
+        if ratio_self < ratio_other {
+            Ordering::Less
+        } else if ratio_self > ratio_other {
+            Ordering::Greater
+        } else {
+            Ordering::Equal
+        }
     }
 }
 
-pub fn zero_one_knapsack(capacity: u32, items: &mut [Item]) {
-    items.sort();
-
+pub fn _01_knapsack(capacity: usize, items: &[Item]) -> () {
     let n = items.len();
-    let mut t = vec![vec![0; (capacity + 1) as usize]; n + 2];
+    let mut matrix = vec![vec![0; (capacity + 1) as usize]; n + 1];
 
-    // fill the table top to bottom, left to right
-    for i in 1..n+2 {
-        let value = items[i-1].value;
-        let weight = items[i-1].weight as i32;
-
-        for j in 1..n+2 {
-
-            let t0 = t[i-1][j];
-            let t1;
-
-            let test = j as i32 - weight;
-            if test < 0 {
-                t1 = 0;
+    for i in 1..=n {
+        for j in 1..=capacity {
+            let item = &items[i - 1];
+            // if j - weight is negative
+            if item.weight > j as u32 {
+                matrix[i][j] = matrix[i - 1][j];
             } else {
-                t1 = value + t[i-1][test as usize];
+                matrix[i][j] = max(
+                    matrix[i - 1][j],
+                    item.value + matrix[i - 1][j - item.weight as usize],
+                );
             }
-
-            t[i][j] = max(t0, t1);
         }
     }
 
-
-    println!("{:?}", t);
+    // printing
+    for row in matrix {
+        for col in row {
+            print!("{} ", col);
+        }
+        println!();
+    }
 }
